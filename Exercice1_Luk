@@ -1,0 +1,66 @@
+# ex 1 risk and uncertainty
+library(ggplot2)
+library(dplyr)
+
+
+
+# define concentration function
+calc_con = function(O1,O2,O3, t){
+  C <- O1/((t/O2+1)^O3)
+  C
+}
+
+## do each step for uniform distribution and normal distribution
+
+# create input data with uniform distributed uncertainties
+sim_unif = data.frame(t = rep(c(1:100),10000),
+                 O1 = runif(10000*100,80,90),
+                 O2 = runif(10000*100,1,3),
+                 O3 = runif(10000*100,0.5,1.5))
+
+# create input data with non uniform distributed uncertainties
+sim_norm = data.frame(t = rep(c(1:100),10000),
+                 O1 = rnorm(10000*100,85,2.4),
+                 O2 = runif(10000*100,1,3),
+                 O3 = runif(10000*100,0.5,1.5))
+
+
+
+# calculate concentration on input data
+sim_unif$con = calc_con(sim_unif$O1, sim_unif$O2, sim_unif$O3, sim_unif$t)
+sim_norm$con = calc_con(sim_norm$O1, sim_norm$O2, sim_norm$O3, sim_norm$t)
+
+# calculate the mean and the lower and upper confidence intervall
+df_plot_unif = sim_unif %>%
+              group_by(t) %>%
+                          do(data.frame(mean = mean(.$con),
+                                        lower = quantile(.$con, c(.025)),
+                                        upper = quantile(.$con, c(.975))
+                                        )
+                            )
+
+df_plot_norm = sim_norm %>%
+  group_by(t) %>%
+  do(data.frame(mean = mean(.$con),
+                lower = quantile(.$con, c(.025)),
+                upper = quantile(.$con, c(.975))
+  )
+  )
+
+
+
+# plot result
+ggplot()+
+  geom_line(data = df_plot_unif, aes(x = t, y = mean))+
+  geom_ribbon(data = df_plot_unif, aes(x = t, ymin = lower, ymax = upper, alpha = 0.5, fill = "unif"))+
+  geom_line(data = df_plot_norm, aes(x = t, y = mean))+
+  geom_ribbon(data = df_plot_norm, aes(x = t, ymin = lower, ymax = upper, alpha = 0.5, fill = "norm"))+
+  ylab(label = "concentration")
+
+
+
+
+
+
+
+
