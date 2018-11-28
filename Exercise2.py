@@ -17,20 +17,13 @@ class Bayes():
     
     def update(self):
         #Bayes update
-        posterior = self.prior
-        i=0
+        posterior = self.prior #initialize
         for i in range(0,np.alen(self.samples)):
-            n = self.samples[i,1]
-            k = self.samples[i,0]
+            n = self.samples[i,1]   #sample size
+            k = self.samples[i,0]   #positives
             nominator = scipy.math.factorial(n)/(scipy.math.factorial(k)*scipy.math.factorial(n-k))*(1-self.x)**(n-k)*self.x**k * posterior
             denominator = np.sum(nominator)
-            posterior = nominator/ denominator
-
-        #plt.figure()
-        #plt.plot(x,posterior)
-        #plt.ylabel('density')
-        #plt.xlabel('possible probability')
-        #plt.show()
+            posterior = nominator/ denominator #update
         return posterior
     
     
